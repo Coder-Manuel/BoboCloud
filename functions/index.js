@@ -6,6 +6,7 @@ admin.initializeApp(functions.config().functions);
 var newData;
 var newUpdate;
 
+// Sends notification to drivers after client requests a ride
 exports.rideRequest =
     functions.firestore.document('Request/{requestId}').onWrite(async (snapshot, context) => {
         if (snapshot.empty) {
@@ -18,6 +19,7 @@ exports.rideRequest =
             console.log('Just an Update from the Driver');
             return;
         }
+    // Data to be sent in the fcm
         var payload = {
             notification: { title: 'Ride Request', body: 'Client is Awaiting', sound: 'default', priority: "high", },
             data: {
@@ -42,6 +44,7 @@ exports.rideRequest =
         }
     });
 
+// Sends notification to client after driver responds to request
 exports.rideResponse =
     functions.firestore.document('Response/{requestId}').onWrite(async (snapshot, context) => {
         if (snapshot.empty) {
@@ -50,6 +53,7 @@ exports.rideResponse =
         }
         newUpdate = snapshot.after.data();
         var tokenId = newUpdate.token;
+    // Data to be sent in the fcm
         var payload = {
             notification: { title: 'Driver Response', body: 'On My Way', sound: 'default', priority: "high", },
             data: { click_action: 'FLUTTER_NOTIFICATION_CLICK', head: "Hey Am on my Way", name: newUpdate.driver, photo: newUpdate.photo },
